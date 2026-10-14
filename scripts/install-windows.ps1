@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Installs Tapo Cloud Personal on Windows 10/11 (per-user, no admin needed).
 

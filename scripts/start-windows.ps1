@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Starts Tapo Cloud Personal (MediaMTX + backend + camera service) and opens the browser.
   Close the window or press Ctrl+C to stop everything cleanly.
