@@ -1,0 +1,97 @@
+# Tapo Cloud Personal — Docker deployment (Linux, NAS, Raspberry Pi).
+#
+#   cp .env.example .env        # set HOST_LAN_IP, TAPOCLOUD_INTERNAL_TOKEN, TAPOCLOUD_MASTER_KEY
+#   docker compose up -d --build
+#   open http://<HOST_LAN_IP>:8080
+#
+# Optional profiles:
+#   docker compose --profile postgres up -d     # PostgreSQL instead of SQLite
+#   docker compose --profile proxy up -d        # Caddy with HTTPS on the LAN
+#
+# Nothing here is published to the Internet: use Tailscale/WireGuard for remote access.
+
+x-app: &app
+  build: ./backend
+  image: tapocloud/backend:local
+  restart: unless-stopped
+  env_file: .env
+  environment: &app-env
+    TAPOCLOUD_DATA_DIR: /data
+    TAPOCLOUD_RECORDINGS_DIR: /recordings
+    TAPOCLOUD_CAMERA_SERVICE_HOST: camera-service
+    TAPOCLOUD_MEDIAMTX_API_URL: http://streaming:9997
+    TAPOCLOUD_MEDIAMTX_RTSP_URL: rtsp://streaming:8554
+    # Browser goes through the frontend's reverse proxy (same origin).
+    TAPOCLOUD_PUBLIC_WEBRTC_URL: /webrtc
+    TAPOCLOUD_PUBLIC_HLS_URL: /hls
+    TAPOCLOUD_FORWARDED_ALLOW_IPS: "*"   # backend is only reachable from the compose network
+  volumes:
+    - tapo-data:/data
+    - ${RECORDINGS_PATH:-./recordings}:/recordings
+
+services:
+  frontend:
+    build: ./frontend
+    image: tapocloud/frontend:local
+    restart: unless-stopped
+    ports:
+      - "${UI_PORT:-8080}:8080"
+    depends_on: [backend]
+
+  backend:
+    <<: *app
+    command: ["python", "-m", "tapocloud.api"]
+    depends_on: [streaming]
+
+  camera-service:
+    <<: *app
+    command: ["python", "-m", "tapocloud.camera_service"]
+    environment:
+      <<: *app-env
+      TAPOCLOUD_CAMERA_SERVICE_HOST: 0.0.0.0   # listen inside the compose network
+    healthcheck:
+      disable: true
+    depends_on: [backend, streaming]
+
+  streaming:
+    image: bluenviron/mediamtx:1.15.3
+    restart: unless-stopped
+    volumes:
+      - ./config/mediamtx.yml:/mediamtx.yml:ro
+    environment:
+      # Overrides of config/mediamtx.yml for the container network.
+      MTX_AUTHHTTPADDRESS: http://backend:8000/internal/mediamtx/auth
+      MTX_APIADDRESS: :9997          # reachable by camera-service; NOT published
+      MTX_RTSPADDRESS: :8554         # internal consumers; NOT published
+      MTX_WEBRTCADDITIONALHOSTS: ${HOST_LAN_IP:-}
+    ports:
+      - "8189:8189/udp"              # WebRTC media (ICE). Signalling goes via the frontend proxy.
+
+  # --- optional: PostgreSQL instead of SQLite -----------------------------
+  database:
+    image: postgres:16-alpine
+    profiles: [postgres]
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tapocloud
+      POSTGRES_USER: tapocloud
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+
+  # --- optional: HTTPS on the LAN with Caddy's internal CA -----------------
+  reverse-proxy:
+    image: caddy:2-alpine
+    profiles: [proxy]
+    restart: unless-stopped
+    ports:
+      - "443:443"
+    volumes:
+      - ./config/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    depends_on: [frontend]
+
+volumes:
+  tapo-data:
+  pg-data:
+  caddy-data:

@@ -1,0 +1,74 @@
+###############################################################################
+# MediaMTX configuration for Tapo Cloud Personal (tested with MediaMTX v1.15.x)
+#
+# Role: streaming relay. It keeps ONE connection per camera stream and serves:
+#   * WebRTC (WHEP)  :8889  -> browser live view, ~0.3-1 s latency on a LAN
+#   * LL-HLS         :8888  -> fallback when WebRTC is not possible
+#   * RTSP           :8554  -> internal consumers (recorder, snapshots, motion)
+#
+# Camera paths are NOT defined here: the camera-service registers them at
+# runtime through the control API, so camera passwords never touch this file.
+###############################################################################
+
+logLevel: info
+logDestinations: [stdout]
+readTimeout: 10s
+writeTimeout: 10s
+
+# --- Authentication ----------------------------------------------------------
+# Every reader is validated by the backend: internal services use the shared
+# internal token, browsers use a short-lived per-camera token. Publishing is
+# always refused (the only sources are our cameras).
+authMethod: http
+authHTTPAddress: http://127.0.0.1:8000/internal/mediamtx/auth
+authHTTPExclude:
+  - action: api
+  - action: metrics
+  - action: pprof
+
+# --- Control API (never expose it outside this machine/container network) ---
+api: yes
+apiAddress: 127.0.0.1:9997
+
+metrics: no
+pprof: no
+playback: no
+
+# --- RTSP (internal consumers) -----------------------------------------------
+rtsp: yes
+rtspTransports: [tcp]
+# Loopback only on a native install; docker-compose overrides this.
+rtspAddress: 127.0.0.1:8554
+
+rtmp: no
+srt: no
+
+# --- LL-HLS (fallback player) ------------------------------------------------
+hls: yes
+hlsAddress: :8888
+hlsAllowOrigin: '*'
+hlsVariant: lowLatency
+hlsSegmentCount: 7
+hlsSegmentDuration: 1s
+hlsPartDuration: 200ms
+
+# --- WebRTC (primary player) -------------------------------------------------
+webrtc: yes
+webrtcAddress: :8889
+webrtcAllowOrigin: '*'
+webrtcLocalUDPAddress: :8189
+webrtcLocalTCPAddress: ''
+webrtcIPsFromInterfaces: yes
+# In Docker (bridge network) add the host's LAN IP here, e.g. [192.168.1.10]
+webrtcAdditionalHosts: []
+# No STUN/TURN: this is a LAN-only service. Remote access goes through a VPN
+# (Tailscale/WireGuard), which looks like a LAN to WebRTC.
+webrtcICEServers2: []
+
+pathDefaults:
+  # Pulled streams reconnect automatically when the camera drops.
+  rtspTransport: tcp
+  sourceOnDemandStartTimeout: 15s
+  sourceOnDemandCloseAfter: 20s
+
+paths: {}

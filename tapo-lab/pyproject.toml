@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tapo-lab"
+version = "0.0.1"
+description = "EXPERIMENTAL interoperability lab for your own Tapo cameras (optional add-on for Tapo Cloud Personal)"
+requires-python = ">=3.11"
+dependencies = ["tapocloud"]
+
+[project.optional-dependencies]
+# Open-source client for the camera's local API (uses your own credentials).
+pytapo = ["pytapo>=3.3"]
+
+[tool.setuptools.packages.find]
+include = ["tapo_lab*"]
+
+[tool.ruff]
+extend = "../backend/pyproject.toml"
+
+[tool.ruff.lint.isort]
+known-first-party = ["tapo_lab", "tapocloud"]

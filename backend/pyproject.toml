@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tapocloud"
+version = "0.1.0"
+description = "Tapo Cloud Personal: self-hosted recording and Google Drive backup for your own Tapo/ONVIF cameras"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "sqlalchemy>=2.0.30",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "cryptography>=42",
+    "httpx>=0.27",
+    "numpy>=1.26",
+    "psutil>=5.9",
+    "python-multipart>=0.0.9",
+    "defusedxml>=0.7",
+]
+
+[project.optional-dependencies]
+postgres = ["psycopg[binary]>=3.1"]
+keyring = ["keyring>=25"]
+dev = ["pytest>=8", "ruff>=0.5"]
+
+[project.scripts]
+tapocloud-api = "tapocloud.api.__main__:main"
+tapocloud-cameras = "tapocloud.camera_service.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["tapocloud*"]
+
+[tool.ruff]
+line-length = 130
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S", "A"]
+# S104: binding 0.0.0.0 is intended (LAN access). S105: OAuth/WS-Security URLs, not passwords.
+ignore = ["S101", "S104", "S105", "S603", "S607", "S311", "S324", "B008", "E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
