@@ -118,6 +118,12 @@ def _humanize_error(err: str) -> str:
         return "Ruta de stream no encontrada (404). Prueba stream1 / stream2."
     if "connection refused" in low:
         return "Conexión rechazada: ¿puerto RTSP correcto (554)?"
+    # Windows FFmpeg reports socket errors as negative errno values:
+    # -138 / -10060 = timed out, -10061 = refused, -10065/-10051 = unreachable.
+    if any(code in low for code in ("error number -138", "-10060", "-10065", "-10051")):
+        return "La cámara no responde en esa IP: comprueba la IP y que el PC y la cámara estén en la misma red."
+    if "-10061" in low:
+        return "Conexión rechazada: ¿puerto RTSP correcto (554)?"
     if "timed out" in low or "timeout" in low:
         return "Tiempo de espera agotado: la cámara no responde."
     return err[:200]

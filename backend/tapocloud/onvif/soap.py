@@ -149,7 +149,8 @@ class SoapClient:
                 timeout=timeout or self._http.timeout,
             )
         except httpx.HTTPError as exc:
-            raise OnvifError(f"ONVIF request failed: {exc.__class__.__name__}") from exc
+            hint = " (la cámara no responde en esa IP/puerto)" if isinstance(exc, httpx.ConnectError | httpx.TimeoutException) else ""
+            raise OnvifError(f"ONVIF request failed: {exc.__class__.__name__}{hint}") from exc
         try:
             root = safe_fromstring(resp.content)  # hardened against XML bombs / external entities
         except ET.ParseError as exc:
