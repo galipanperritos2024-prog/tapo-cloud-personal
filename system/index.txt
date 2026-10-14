@@ -1,0 +1,21 @@
+1:"$Sreact.fragment"
+2:I[8771,["604","static/chunks/604-b86f570f401f7b01.js","619","static/chunks/619-ba102abea3e3d0e4.js","177","static/chunks/app/layout-947effa096c8a05a.js"],"default"]
+3:I[9766,[],""]
+4:I[8924,[],""]
+5:I[2619,["619","static/chunks/619-ba102abea3e3d0e4.js","345","static/chunks/app/not-found-b45ab1f3440b6bdf.js"],""]
+6:I[1959,[],"ClientPageRoot"]
+7:I[8210,["604","static/chunks/604-b86f570f401f7b01.js","186","static/chunks/app/system/page-42bdfadd8af508f7.js"],"default"]
+a:I[4431,[],"OutletBoundary"]
+c:I[5278,[],"AsyncMetadataOutlet"]
+e:I[4431,[],"ViewportBoundary"]
+10:I[4431,[],"MetadataBoundary"]
+11:"$Sreact.suspense"
+13:I[7150,[],""]
+:HL["/_next/static/css/80efbaf6c2b60243.css","style"]
+0:{"P":null,"b":"cSYXSqUxYAxzyHdvxRbGq","p":"","c":["","system",""],"i":false,"f":[[["",{"children":["system",{"children":["__PAGE__",{}]}]},"$undefined","$undefined",true],["",["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/css/80efbaf6c2b60243.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]],["$","html",null,{"lang":"es","className":"dark","children":["$","body",null,{"children":["$","$L2",null,{"children":["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","div",null,{"className":"flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center","children":[["$","h1",null,{"className":"text-2xl font-semibold","children":"Página no encontrada"}],["$","$L5",null,{"href":"/","className":"btn-primary","children":"Volver al inicio"}]]}],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}]}]}]]}],{"children":["system",["$","$1","c",{"children":[null,["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":["__PAGE__",["$","$1","c",{"children":[["$","$L6",null,{"Component":"$7","searchParams":{},"params":{},"promises":["$@8","$@9"]}],null,["$","$La",null,{"children":["$Lb",["$","$Lc",null,{"promise":"$@d"}]]}]]}],{},null,false]},null,false]},null,false],["$","$1","h",{"children":[null,[["$","$Le",null,{"children":"$Lf"}],null],["$","$L10",null,{"children":["$","div",null,{"hidden":true,"children":["$","$11",null,{"fallback":null,"children":"$L12"}]}]}]]}],false]],"m":"$undefined","G":["$13",[]],"s":false,"S":true}
+8:{}
+9:"$0:f:0:1:2:children:2:children:1:props:children:0:props:params"
+f:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","2",{"name":"theme-color","content":"#0a0d12"}]]
+b:null
+d:{"metadata":[["$","title","0",{"children":"Tapo Cloud Personal"}],["$","meta","1",{"name":"description","content":"Tus cámaras, tu red, tu Google Drive."}]],"error":null,"digest":"$undefined"}
+12:"$d:metadata"
