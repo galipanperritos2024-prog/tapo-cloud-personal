@@ -35,14 +35,22 @@ $candidates = @(
     @{ Exe = "python"; Args = @() }
 )
 $py = $null
+# Windows PowerShell 5.1 turns a native command's stderr into a terminating
+# error under "Stop"; probing missing versions must not abort the script.
+$ErrorActionPreference = "Continue"
 foreach ($c in $candidates) {
     if (-not (Get-Command $c.Exe -ErrorAction SilentlyContinue)) { continue }
-    $v = & $c.Exe @($c.Args) -c "import sys; print('%d.%d' % sys.version_info[:2])" 2>$null
-    if ($LASTEXITCODE -eq 0 -and $v -and [version]$v -ge [version]"3.11") { $py = $c; break }
+    try {
+        $v = & $c.Exe @($c.Args) -c "import sys; print('%d.%d' % sys.version_info[:2])" 2>$null
+    } catch { continue }
+    # "python" may be the Microsoft Store alias, which prints nothing useful.
+    if ($LASTEXITCODE -eq 0 -and "$v" -match '^\d+\.\d+$' -and [version]"$v" -ge [version]"3.11") { $py = $c; break }
 }
+$ErrorActionPreference = "Stop"
 if (-not $py) {
     Write-Host "Python 3.11+ no encontrado. Instálalo con:" -ForegroundColor Yellow
     Write-Host "  winget install Python.Python.3.12"
+    Write-Host "Después cierra y vuelve a abrir PowerShell y ejecuta de nuevo este script."
     exit 1
 }
 Write-Host "Usando: $($py.Exe) $($py.Args -join ' ')"
