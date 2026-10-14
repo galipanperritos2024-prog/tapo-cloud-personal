@@ -26,6 +26,18 @@ New-Item -ItemType Directory -Force -Path $Bin | Out-Null
 
 function Step($msg) { Write-Host "`n==> $msg" -ForegroundColor Cyan }
 
+# Download with a visible progress bar. curl.exe ships with Windows 10/11 and is
+# far faster than Invoke-WebRequest; fall back to it only if curl is missing.
+function Download($url, $dest) {
+    Write-Host "    $url"
+    if (Get-Command curl.exe -ErrorAction SilentlyContinue) {
+        & curl.exe -L --fail --retry 3 --progress-bar -o $dest $url
+        if ($LASTEXITCODE -ne 0) { throw "Descarga fallida: $url" }
+    } else {
+        Invoke-WebRequest $url -OutFile $dest
+    }
+}
+
 # --- 1. Python ----------------------------------------------------------------
 Step "Comprobando Python 3.11+"
 $candidates = @(
@@ -77,9 +89,9 @@ if (-not (Test-Path $venvPy)) {
 
 # --- 3. FFmpeg + MediaMTX -------------------------------------------------------------
 if (-not (Test-Path (Join-Path $Bin "ffmpeg.exe"))) {
-    Step "Descargando FFmpeg"
+    Step "Descargando FFmpeg (~100 MB, puede tardar unos minutos)"
     $zip = Join-Path $env:TEMP "ffmpeg-essentials.zip"
-    Invoke-WebRequest "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip" -OutFile $zip
+    Download "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip" $zip
     $tmp = Join-Path $env:TEMP "ffmpeg-extract"
     Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
     Expand-Archive $zip -DestinationPath $tmp
@@ -89,7 +101,7 @@ if (-not (Test-Path (Join-Path $Bin "ffmpeg.exe"))) {
 if (-not (Test-Path (Join-Path $Bin "mediamtx.exe"))) {
     Step "Descargando MediaMTX v$MediaMtxVersion"
     $zip = Join-Path $env:TEMP "mediamtx.zip"
-    Invoke-WebRequest "https://github.com/bluenviron/mediamtx/releases/download/v$MediaMtxVersion/mediamtx_v${MediaMtxVersion}_windows_amd64.zip" -OutFile $zip
+    Download "https://github.com/bluenviron/mediamtx/releases/download/v$MediaMtxVersion/mediamtx_v${MediaMtxVersion}_windows_amd64.zip" $zip
     $tmp = Join-Path $env:TEMP "mediamtx-extract"
     Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
     Expand-Archive $zip -DestinationPath $tmp
@@ -110,7 +122,7 @@ if (-not (Test-Path (Join-Path $outDir "index.html"))) {
         # No Node.js: download the prebuilt UI published on the "ui-build" branch.
         Step "Descargando la interfaz web precompilada"
         $zip = Join-Path $env:TEMP "tapocloud-ui.zip"
-        Invoke-WebRequest "https://github.com/galipanperritos2024-prog/tapo-cloud-personal/archive/refs/heads/ui-build.zip" -OutFile $zip
+        Download "https://github.com/galipanperritos2024-prog/tapo-cloud-personal/archive/refs/heads/ui-build.zip" $zip
         $tmp = Join-Path $env:TEMP "tapocloud-ui"
         Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
         Expand-Archive $zip -DestinationPath $tmp
