@@ -31,7 +31,8 @@ Cámara Tapo ──RTSP/ONVIF──▶ MediaMTX (relé) ──▶ camera-service
 ### Windows 11
 
 ```powershell
-git clone <este-repo> TapoCloud; cd TapoCloud
+git clone https://github.com/galipanperritos2024-prog/tapo-cloud-personal.git TapoCloud
+cd TapoCloud
 powershell -ExecutionPolicy Bypass -File scripts\install-windows.ps1
 powershell -ExecutionPolicy Bypass -File scripts\start-windows.ps1
 ```

@@ -9,7 +9,7 @@ Requisitos comunes: las cámaras y el equipo en la misma red local; en cada Tapo
    winget install Python.Python.3.12
    winget install OpenJS.NodeJS.LTS
    ```
-2. Descarga el proyecto y ejecuta el instalador (sin permisos de administrador):
+2. Descarga el proyecto (`git clone https://github.com/galipanperritos2024-prog/tapo-cloud-personal.git TapoCloud` y `cd TapoCloud`, o descarga el ZIP desde GitHub) y ejecuta el instalador **desde esa carpeta** (sin permisos de administrador):
    ```powershell
    powershell -ExecutionPolicy Bypass -File scripts\install-windows.ps1
    ```
@@ -48,7 +48,7 @@ Copia de seguridad: volumen `tapo-data` (BD, `secret.key`, `internal.token`) + c
 
 ```bash
 sudo apt install python3-venv ffmpeg
-git clone <repo> /opt/tapocloud && cd /opt/tapocloud
+git clone https://github.com/galipanperritos2024-prog/tapo-cloud-personal.git /opt/tapocloud && cd /opt/tapocloud
 python3 -m venv .venv && .venv/bin/pip install -e backend
 # MediaMTX (elige amd64 / arm64v8 / armv7):
 curl -L https://github.com/bluenviron/mediamtx/releases/download/v1.15.3/mediamtx_v1.15.3_linux_arm64v8.tar.gz | tar xz -C bin mediamtx
