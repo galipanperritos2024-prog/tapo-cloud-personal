@@ -3,10 +3,10 @@
   Installs Tapo Cloud Personal on Windows 10/11 (per-user, no admin needed).
 
 .DESCRIPTION
-  1. Checks Python 3.11+ (offers the winget command if missing).
+  1. Checks Python 3.11+ (PATH, py launcher and default install folders).
   2. Creates .venv and installs the backend.
   3. Downloads FFmpeg (gyan.dev "essentials" build) and MediaMTX into .\bin.
-  4. Builds the web UI (needs Node.js LTS, one time only).
+  4. Builds the web UI with Node.js if present, otherwise downloads it prebuilt.
   5. Optionally adds Windows Firewall rules (Private networks only).
 
 .EXAMPLE
@@ -34,12 +34,23 @@ $candidates = @(
     @{ Exe = "py"; Args = @("-3.11") },
     @{ Exe = "python"; Args = @() }
 )
+# Also look where the python.org / winget installers put Python, in case PATH
+# was not refreshed (or "Add to PATH" was unchecked).
+foreach ($base in @("$env:LOCALAPPDATA\Programs\Python", "$env:ProgramFiles", "${env:ProgramFiles(x86)}")) {
+    if (-not $base -or -not (Test-Path $base)) { continue }
+    Get-ChildItem $base -Directory -Filter "Python3*" -ErrorAction SilentlyContinue |
+        Sort-Object Name -Descending |
+        ForEach-Object {
+            $exe = Join-Path $_.FullName "python.exe"
+            if (Test-Path $exe) { $candidates += @{ Exe = $exe; Args = @() } }
+        }
+}
 $py = $null
 # Windows PowerShell 5.1 turns a native command's stderr into a terminating
 # error under "Stop"; probing missing versions must not abort the script.
 $ErrorActionPreference = "Continue"
 foreach ($c in $candidates) {
-    if (-not (Get-Command $c.Exe -ErrorAction SilentlyContinue)) { continue }
+    if (-not (Test-Path $c.Exe) -and -not (Get-Command $c.Exe -ErrorAction SilentlyContinue)) { continue }
     try {
         $v = & $c.Exe @($c.Args) -c "import sys; print('%d.%d' % sys.version_info[:2])" 2>$null
     } catch { continue }
@@ -87,17 +98,25 @@ if (-not (Test-Path (Join-Path $Bin "mediamtx.exe"))) {
 }
 
 # --- 4. Web UI -------------------------------------------------------------------
-$out = Join-Path $Root "frontend\out\index.html"
-if (-not (Test-Path $out)) {
-    Step "Compilando la interfaz web"
+$outDir = Join-Path $Root "frontend\out"
+if (-not (Test-Path (Join-Path $outDir "index.html"))) {
     if (Get-Command npm -ErrorAction SilentlyContinue) {
+        Step "Compilando la interfaz web"
         Push-Location (Join-Path $Root "frontend")
         npm ci --no-audit --no-fund
         npm run build
         Pop-Location
     } else {
-        Write-Host "Node.js no encontrado (solo hace falta una vez para compilar la interfaz):" -ForegroundColor Yellow
-        Write-Host "  winget install OpenJS.NodeJS.LTS   y vuelve a ejecutar este script"
+        # No Node.js: download the prebuilt UI published on the "ui-build" branch.
+        Step "Descargando la interfaz web precompilada"
+        $zip = Join-Path $env:TEMP "tapocloud-ui.zip"
+        Invoke-WebRequest "https://github.com/galipanperritos2024-prog/tapo-cloud-personal/archive/refs/heads/ui-build.zip" -OutFile $zip
+        $tmp = Join-Path $env:TEMP "tapocloud-ui"
+        Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
+        Expand-Archive $zip -DestinationPath $tmp
+        New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+        Copy-Item (Join-Path $tmp "tapo-cloud-personal-ui-build\*") $outDir -Recurse -Force
+        Remove-Item $zip, $tmp -Recurse -Force
     }
 }
 

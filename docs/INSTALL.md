@@ -4,7 +4,7 @@ Requisitos comunes: las cámaras y el equipo en la misma red local; en cada Tapo
 
 ## Windows 10/11 (nativo, recomendado para empezar)
 
-1. Instala Python 3.11+ y Node.js LTS (este último solo para compilar la interfaz una vez):
+1. Instala Python 3.11+ (Node.js es opcional: sin él se descarga la interfaz ya compilada):
    ```powershell
    winget install Python.Python.3.12
    winget install OpenJS.NodeJS.LTS
